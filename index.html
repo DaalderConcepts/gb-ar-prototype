@@ -149,6 +149,8 @@
   @media (hover: none) and (pointer: coarse), (max-width: 720px) {
     .bgbar, .innerbar { display: none !important; }
     .opt-btn { display: inline-flex; }
+    .lid-btn { top: auto; left: 12px; bottom: 58px; }
+    .fs-btn { display: none; }
     .sheet { display: block; }
   }
   .photo-tools { display: none; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
@@ -263,13 +265,23 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></svg>
           Bekijk in je tuin
         </button>
-        <div class="hud"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
-      </model-viewer>
-      <div class="readout"><span class="dot"></span> 3D · Large 21" · schaal 1:1</div>
       <button type="button" class="lid-btn" id="lidBtn" data-lid="closed" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h16"/><path d="M6 13a6 6 0 0 1 12 0"/><path d="M5 13v4h14v-4"/></svg>
         <span>Deksel open</span>
       </button>
+      <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        Opties
+      </button>
+      <div class="ar-hint" id="arHint" role="status">Sleep de kamado om hem te verplaatsen · draai met twee vingers · hij staat op ware grootte</div>
+    <div class="sheet-bg" id="sheetBg"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-label="Opties">
+      <div class="grip"></div>
+      <button type="button" class="close" id="sheetClose" aria-label="Sluiten">×</button>
+    </div>
+        <div class="hud"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+      </model-viewer>
+      <div class="readout"><span class="dot"></span> 3D · Large 21" · schaal 1:1</div>
       <button type="button" class="fs-btn" id="fsOpen" aria-label="Open op volledig scherm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
         Volledig scherm
@@ -278,12 +290,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         Sluiten
       </button>
-      <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-        Opties
-      </button>
       <div class="hint">Sleep om te draaien · knijp om te zoomen</div>
-      <div class="ar-hint" id="arHint" role="status">Sleep de kamado om hem te verplaatsen · draai met twee vingers · hij staat op ware grootte</div>
       <div class="loading">Model wordt opgebouwd…</div>
     </div>
     <div class="bgbar" role="group" aria-label="Achtergrond">
@@ -316,11 +323,6 @@
       <label>Hoogte <input type="range" id="modelLift" min="-40" max="40" value="0" aria-label="Kamado hoger of lager"></label>
       <span class="note">Sleep de kamado om hem te draaien. De foto blijft op je eigen toestel en wordt nergens geüpload.</span>
     </div>
-    </div>
-    <div class="sheet-bg" id="sheetBg"></div>
-    <div class="sheet" id="sheet" role="dialog" aria-label="Opties">
-      <div class="grip"></div>
-      <button type="button" class="close" id="sheetClose" aria-label="Sluiten">×</button>
     </div>
     <div class="fs-overlay" id="fsOverlay" role="dialog" aria-modal="true" aria-label="Kamado op volledig scherm"></div>
 
