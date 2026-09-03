@@ -121,6 +121,33 @@
   .chip svg { width: 14px; height: 14px; }
   .chip input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .innerbar .chip.is-off { opacity: .55; text-decoration: line-through; }
+  /* ---- mobiel: opties-knop + bottom sheet ---- */
+  .opt-btn { display: none; position: absolute; left: 12px; bottom: 12px; z-index: 6; height: 38px; padding: 0 14px 0 10px; border-radius: 19px; border: 0; background: rgba(28,26,23,.92); color: var(--cream); font: 500 12px/1 var(--font-sans); align-items: center; gap: 7px; }
+  .opt-btn svg { width: 16px; height: 16px; }
+  .sheet-bg { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); }
+  .sheet { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 72vh; overflow: auto; background: #262421; color: var(--cream); border-radius: 18px 18px 0 0; padding: 8px 18px calc(18px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .28s ease; }
+  .sheet .grip { width: 38px; height: 4px; border-radius: 2px; background: #4a463f; margin: 4px auto 10px; }
+  .sheet h4 { margin: 14px 0 4px; font: 10px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--fog); }
+  .sheet .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #3a3733; font-size: 14px; }
+  .sheet .row:last-child { border-bottom: 0; }
+  .sheet .seg { display: flex; gap: 4px; background: #1c1a17; border-radius: 9px; padding: 3px; }
+  .sheet .seg button { border: 0; background: transparent; color: var(--fog); font: 500 12px/1 var(--font-sans); padding: 7px 10px; border-radius: 7px; }
+  .sheet .seg button.is-on { background: #3a3733; color: var(--cream); }
+  .sheet .sw { position: relative; width: 38px; height: 22px; border-radius: 11px; background: #4a463f; border: 0; flex: none; transition: background .2s; }
+  .sheet .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 9px; background: #fff; transition: transform .2s; }
+  .sheet .sw.is-on { background: var(--ember); }
+  .sheet .sw.is-on::after { transform: translateX(16px); }
+  .sheet .chips { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
+  .sheet .chips button { flex: none; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-sans); padding: 8px 12px; border-radius: 16px; white-space: nowrap; }
+  .sheet .chips button.is-on { border-color: var(--ember); }
+  .sheet .close { position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border-radius: 16px; border: 0; background: #3a3733; color: var(--cream); font-size: 16px; }
+  body.sheet-open .sheet-bg { display: block; }
+  body.sheet-open .sheet { display: block; transform: translateY(0); }
+  @media (hover: none) and (pointer: coarse), (max-width: 720px) {
+    .bgbar, .innerbar { display: none !important; }
+    .opt-btn { display: inline-flex; }
+    .sheet { display: block; }
+  }
   .photo-tools { display: none; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .stage-wrap.has-photo .photo-tools { display: flex; }
   .photo-tools label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fog); }
@@ -248,6 +275,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         Sluiten
       </button>
+      <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        Opties
+      </button>
       <div class="hint">Sleep om te draaien · knijp om te zoomen</div>
       <div class="loading">Model wordt opgebouwd…</div>
     </div>
@@ -281,6 +312,11 @@
       <label>Hoogte <input type="range" id="modelLift" min="-40" max="40" value="0" aria-label="Kamado hoger of lager"></label>
       <span class="note">Sleep de kamado om hem te draaien. De foto blijft op je eigen toestel en wordt nergens geüpload.</span>
     </div>
+    </div>
+    <div class="sheet-bg" id="sheetBg"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-label="Opties">
+      <div class="grip"></div>
+      <button type="button" class="close" id="sheetClose" aria-label="Sluiten">×</button>
     </div>
     <div class="fs-overlay" id="fsOverlay" role="dialog" aria-modal="true" aria-label="Kamado op volledig scherm"></div>
 
@@ -615,6 +651,56 @@
     }
   }
   customElements.whenDefined('model-viewer').then(function () { setTimeout(setStatus, 300); });
+
+  // ---- mobiel: bottom sheet die de bestaande chips spiegelt ----
+  (function () {
+    var sheet = document.getElementById('sheet'), bg = document.getElementById('sheetBg');
+    var open = function () { document.body.classList.add('sheet-open'); };
+    var close = function () { document.body.classList.remove('sheet-open'); };
+    document.getElementById('optBtn').addEventListener('click', open);
+    document.getElementById('sheetClose').addEventListener('click', close);
+    bg.addEventListener('click', close);
+    var mirrors = [];
+    function h4(t) { var e = document.createElement('h4'); e.textContent = t; sheet.appendChild(e); }
+    // achtergrond: chips-rij
+    h4('Achtergrond');
+    var chips = document.createElement('div'); chips.className = 'chips'; sheet.appendChild(chips);
+    document.querySelectorAll('.bgbar [data-bg]').forEach(function (src) {
+      var b = document.createElement('button'); b.type = 'button';
+      b.textContent = src.getAttribute('data-bg') === 'photo' ? 'Eigen foto' : src.textContent.trim();
+      b.addEventListener('click', function () { var inp = src.querySelector('input'); if (inp) inp.click(); else src.click(); });
+      chips.appendChild(b); mirrors.push([src, b]);
+    });
+    // binnenwerk: roosters als segment, de rest als schakelaar
+    h4('Binnenwerk');
+    var row = document.createElement('div'); row.className = 'row'; row.innerHTML = '<span>Roosters</span>'; sheet.appendChild(row);
+    var seg = document.createElement('div'); seg.className = 'seg'; row.appendChild(seg);
+    [['inox', 'Rvs'], ['cast', 'Gietijzer']].forEach(function (p) {
+      var src = document.querySelector('[data-inner="' + p[0] + '"]');
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = p[1];
+      b.addEventListener('click', function () { if (!src.classList.contains('is-on')) src.click(); });
+      seg.appendChild(b); mirrors.push([src, b]);
+    });
+    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld']].forEach(function (p) {
+      var src = document.querySelector('[data-inner="' + p[0] + '"]');
+      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>' + p[1] + '</span>';
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', p[1]);
+      sw.addEventListener('click', function () { src.click(); });
+      r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
+    });
+    h4('Weergave');
+    (function () {
+      var src = document.querySelector('[data-autorotate]');
+      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Automatisch draaien</span>';
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Automatisch draaien');
+      sw.addEventListener('click', function () { src.click(); });
+      r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
+    })();
+    function sync() { mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); }); }
+    var mo = new MutationObserver(sync);
+    mirrors.forEach(function (m) { mo.observe(m[0], { attributes: true, attributeFilter: ['class'] }); });
+    sync();
+  })();
 
   // QR naar deze pagina
   try {
