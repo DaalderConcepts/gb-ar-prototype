@@ -122,7 +122,7 @@
   .chip input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .innerbar .chip.is-off { opacity: .55; text-decoration: line-through; }
   /* ---- mobiel: opties-knop + bottom sheet ---- */
-  .opt-btn { display: none; position: absolute; left: 12px; bottom: 12px; z-index: 6; height: 38px; padding: 0 14px 0 10px; border-radius: 19px; border: 0; background: rgba(28,26,23,.92); color: var(--cream); font: 500 12px/1 var(--font-sans); align-items: center; gap: 7px; }
+  .opt-btn { display: none; position: absolute; left: 12px; bottom: 12px; z-index: 6; height: 38px; padding: 0 14px 0 10px; border-radius: 19px; border: 0; background: rgba(28,26,23,.92); color: var(--cream); font: 500 12px/1 var(--font-body); align-items: center; gap: 7px; }
   .opt-btn svg { width: 16px; height: 16px; }
   .sheet-bg { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); }
   .sheet { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 72vh; overflow: auto; background: #262421; color: var(--cream); border-radius: 18px 18px 0 0; padding: 8px 18px calc(18px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .28s ease; }
@@ -131,15 +131,15 @@
   .sheet .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #3a3733; font-size: 14px; }
   .sheet .row:last-child { border-bottom: 0; }
   .sheet .seg { display: flex; gap: 4px; background: #1c1a17; border-radius: 9px; padding: 3px; }
-  .sheet .seg button { border: 0; background: transparent; color: var(--fog); font: 500 12px/1 var(--font-sans); padding: 7px 10px; border-radius: 7px; }
+  .sheet .seg button { border: 0; background: transparent; color: var(--fog); font: 500 12px/1 var(--font-body); padding: 7px 10px; border-radius: 7px; }
   .sheet .seg button.is-on { background: #3a3733; color: var(--cream); }
   .sheet .sw { position: relative; width: 38px; height: 22px; border-radius: 11px; background: #4a463f; border: 0; flex: none; transition: background .2s; }
   .sheet .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 9px; background: #fff; transition: transform .2s; }
-  .sheet .sw.is-on { background: var(--ember); }
+  .sheet .sw.is-on { background: var(--flame); }
   .sheet .sw.is-on::after { transform: translateX(16px); }
   .sheet .chips { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
-  .sheet .chips button { flex: none; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-sans); padding: 8px 12px; border-radius: 16px; white-space: nowrap; }
-  .sheet .chips button.is-on { border-color: var(--ember); }
+  .sheet .chips button { flex: none; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-body); padding: 8px 12px; border-radius: 16px; white-space: nowrap; }
+  .sheet .chips button.is-on { border-color: var(--flame); }
   .sheet .close { position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border-radius: 16px; border: 0; background: #3a3733; color: var(--cream); font-size: 16px; }
   body.sheet-open .sheet-bg { display: block; }
   body.sheet-open .sheet { display: block; transform: translateY(0); }
