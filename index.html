@@ -596,13 +596,14 @@
   }
   function applyEnv(name) {
     var img = name === 'photo' ? photo : presetImgs[name];
-    if (!img) { mv.environmentImage = window.__HDR_URL; mv.exposure = 1.15; mv.shadowIntensity = 1.1; return; }
+    // de echte lucht is ruim helderder dan de oude synthetische; studio op 0,65 geeft weer antraciet
+    if (!img) { mv.environmentImage = window.__HDR_URL; mv.exposure = 0.65; mv.shadowIntensity = 1.1; return; }
     envFromImage(name === 'photo' ? 'photo-' + (photo.width + 'x' + photo.height) : name, img).then(function (env) {
       if (current !== name) return;
       // de HDR-lucht blijft de lichtbron (echte zon, geen kleurzweem van het gras); de foto bepaalt alleen de exposure
       mv.environmentImage = window.__HDR_URL;
       // lichte foto = meer exposure, zodat de matzwarte kamado niet wegvalt tegen de tuin
-      mv.exposure = Math.min(2.2, Math.max(1.2, 1.1 + env.lum * 1.6));
+      mv.exposure = Math.min(1.4, Math.max(0.7, 0.6 + env.lum * 1.0));
       mv.shadowIntensity = 0.9; mv.shadowSoftness = 0.6;
     });
   }
