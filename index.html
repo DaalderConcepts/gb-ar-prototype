@@ -533,7 +533,8 @@
   mv.addEventListener('load', function () {
     setTimeout(applyInner, 50);
     // hout: onder de echte lucht trekt de walnoot naar roze; iets warmer en donkerder multipliceren
-    try { matByName('wood').pbrMetallicRoughness.setBaseColorFactor([0.42, 0.30, 0.22, 1]); } catch (e) {}
+    // de bleke tafels waren luchtreflectie op vlak hout: ruwer maken, en de tint naar donker walnoot
+    try { var wm = matByName('wood'); wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.50, 0.36, 0.27, 1]); } catch (e) {}
   });
   // automatisch draaien aan/uit
   var rotBtn = document.querySelector('[data-autorotate]');
