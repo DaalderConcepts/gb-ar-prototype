@@ -358,6 +358,8 @@
       <button type="button" class="chip is-on" data-inner="basket" data-val="on">Houtskoolmand</button>
       <button type="button" class="chip is-on" data-inner="organizer" data-val="on">Grate organizer gevuld</button>
       <button type="button" class="chip is-off" data-inner="zone" data-val="on">Verplaatszone</button>
+      <button type="button" class="chip is-off" data-inner="vent" data-val="on">Ventilatie onder open</button>
+      <button type="button" class="chip is-off" data-inner="ash" data-val="on">Aslade uit</button>
       <span class="lbl" style="margin-left:10px">Weergave</span>
       <button type="button" class="chip is-on" data-autorotate aria-pressed="true">Automatisch draaien</button>
       <label class="chip light-chip">Licht <input type="range" id="lightRange" min="50" max="250" value="180" aria-label="Lichtsterkte op de kamado"><output id="lightOut">180%</output></label>
@@ -558,7 +560,7 @@
 
   // ---- Binnenwerk ----
   function matByName(name) { return (mv.model && mv.model.materials || []).find(function (m) { return m.name === name; }); }
-  var innerState = { inox: true, cast: false, deflector: true, multilevel: true, organizer: true, basket: true, zone: false };
+  var innerState = { inox: true, cast: false, deflector: true, multilevel: true, organizer: true, basket: true, zone: false, vent: false, ash: false };
   var hidden = {};
   function setVisible(name, on) {
     var m = matByName(name); if (!m) return;
@@ -578,6 +580,8 @@
     setVisible('multilevel', innerState.multilevel);
     setVisible('basket', innerState.basket);
     setVisible('placering', innerState.zone);
+    setVisible('ventc', !innerState.vent); setVisible('vento', innerState.vent);
+    setVisible('ashi', !innerState.ash); setVisible('asho', innerState.ash);
     try { var pr = matByName('placering'); if (pr) pr.setEmissiveFactor([1.0, 0.45, 0.06]); } catch (e) {}   // ring licht altijd op, ook in de schaduw en in AR
     setVisible('orgcast', innerState.organizer); setVisible('orginox', innerState.organizer); setVisible('orgdefl', innerState.organizer);
     document.querySelectorAll('[data-inner=inox],[data-inner=cast],[data-inner=deflector]').forEach(function (c) { c.disabled = !innerState.multilevel; c.style.opacity = innerState.multilevel ? '' : '.35'; });
@@ -939,7 +943,7 @@
       b.addEventListener('click', function () { if (!src.classList.contains('is-on')) src.click(); });
       seg.appendChild(b); mirrors.push([src, b]);
     });
-    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld']].forEach(function (p) {
+    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld'], ['vent', 'Ventilatie onder half open'], ['ash', 'Aslade 80% uit']].forEach(function (p) {
       var src = document.querySelector('[data-inner="' + p[0] + '"]');
       var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>' + p[1] + '</span>';
       var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', p[1]);
