@@ -164,6 +164,15 @@
   body.sheet-open .opt-btn svg { animation: none; }
   @media (prefers-reduced-motion: reduce) { .fs-btn svg, .opt-btn svg { animation: none; } }
   .sheet .chips { scroll-behavior: smooth; }
+  .sheet .qrrow { align-items: flex-start; gap: 14px; }
+  .sheet .qr2 { background: var(--cream); padding: 6px; border-radius: 6px; width: 104px; height: 104px; flex: none; display: grid; place-items: center; }
+  .sheet .qr2 canvas, .sheet .qr2 img { width: 92px; height: 92px; display: block; image-rendering: pixelated; }
+  .sheet .qrrow p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--bone); }
+  .sheet .share { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 4px; }
+  .sheet .share a, .sheet .share button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-body); padding: 9px 12px; border-radius: 16px; text-decoration: none; cursor: pointer; }
+  .sheet .share svg { width: 14px; height: 14px; }
+  .sheet .share .ok { border-color: var(--flame); }
+  @media (hover: none) and (pointer: coarse) { .sheet .qrrow { display: none; } }
   /* ---- desktop: lade links ---- */
   .sheet .lidrow button { border: 1px solid var(--ash); background: rgba(255,255,255,.06); color: var(--cream); font: 500 12px/1 var(--font-body); padding: 9px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
   .sheet .lidrow button svg { width: 14px; height: 14px; }
@@ -408,6 +417,7 @@
   // Echte geometrie uit de SolidWorks/eDrawings-tekening (HOOPS-meshdump), 25% gedecimeerd, gekwantiseerd.
   var mv = document.getElementById('mv');
   var stage = document.getElementById('stage');
+  var SHARE_URL = "https://daalderconcepts.github.io/gb-ar-prototype/";   // hosted.js vervangt dit door de publieke URL
   var b64 = document.getElementById('glb').textContent.trim();
   var bin = atob(b64), bytes = new Uint8Array(bin.length);
   for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -898,6 +908,40 @@
       inp.addEventListener('input', function () { src.value = inp.value; src.dispatchEvent(new Event('input')); });
       r.appendChild(inp); sheet.appendChild(r);
     })();
+    // delen: QR (desktop) + knoppen
+    (function () {
+      h4('Delen');
+      var qr = document.createElement('div'); qr.className = 'row qrrow';
+      var box = document.createElement('div'); box.className = 'qr2'; qr.appendChild(box);
+      var p = document.createElement('p'); p.textContent = 'Scan met je telefoon en zet de kamado op ware grootte in je eigen tuin.'; qr.appendChild(p);
+      sheet.appendChild(qr);
+      try { new QRCode(box, { text: SHARE_URL, width: 92, height: 92, colorDark: '#0A0908', colorLight: '#EEE7DB', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+      var wrap = document.createElement('div'); wrap.className = 'share';
+      var enc = encodeURIComponent(SHARE_URL), msg = encodeURIComponent('Kijk, de Grill Bill kamado in 3D en AR: ' + SHARE_URL);
+      var I = {
+        link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
+        mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+        wa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.7A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 10a4 4 0 0 0 5 5"/></svg>',
+        msgr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 8.5 0 0 0-5 15.6V22l3.3-1.8A9 8.5 0 1 0 12 3z"/><path d="m7.5 13 3-3 2.5 2 3.5-3"/></svg>',
+        share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.6M8.2 13.2l7.6 4.6"/></svg>'
+      };
+      function btn(html, label, href) {
+        var el = document.createElement(href ? 'a' : 'button'); el.innerHTML = html + '<span>' + label + '</span>';
+        if (href) { el.href = href; el.target = '_blank'; el.rel = 'noopener'; } else el.type = 'button';
+        wrap.appendChild(el); return el;
+      }
+      var copy = btn(I.link, 'Kopieer link');
+      copy.addEventListener('click', function () {
+        var done = function () { copy.classList.add('ok'); copy.lastChild.textContent = 'Gekopieerd'; setTimeout(function () { copy.classList.remove('ok'); copy.lastChild.textContent = 'Kopieer link'; }, 1800); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(SHARE_URL).then(done, function () { window.prompt('Kopieer de link:', SHARE_URL); });
+        else window.prompt('Kopieer de link:', SHARE_URL);
+      });
+      btn(I.mail, 'E-mail', 'mailto:?subject=' + encodeURIComponent('Grill Bill kamado in 3D en AR') + '&body=' + msg);
+      btn(I.wa, 'WhatsApp', 'https://wa.me/?text=' + msg);
+      btn(I.msgr, 'Messenger', 'fb-messenger://share/?link=' + enc);
+      if (navigator.share) { var sh = btn(I.share, 'Delen via…'); sh.addEventListener('click', function () { navigator.share({ title: 'Grill Bill kamado in 3D en AR', url: SHARE_URL }).catch(function () {}); }); }
+      sheet.appendChild(wrap);
+    })();
     function sync() {
       mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); });
       var act = chips.querySelector('button.is-on'); if (act) act.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
@@ -911,7 +955,7 @@
   try {
     new QRCode(document.getElementById('qr'), {
       // binnen de artifact is location.href de sandbox-URL van de renderer; de telefoon heeft de echte artifact-link nodig
-      text: "https://daalderconcepts.github.io/gb-ar-prototype/", width: 116, height: 116,
+      text: SHARE_URL, width: 116, height: 116,
       colorDark: '#0A0908', colorLight: '#EEE7DB', correctLevel: QRCode.CorrectLevel.M
     });
   } catch (e) {}
