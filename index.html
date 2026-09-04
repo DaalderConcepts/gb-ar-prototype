@@ -157,6 +157,19 @@
   .light-chip input { position: static; width: 110px; height: auto; opacity: 1; pointer-events: auto; accent-color: var(--flame); margin: 0; }
   .light-chip output { font-family: var(--font-mono); font-size: 10px; color: var(--fog); min-width: 34px; }
   .sheet .row input[type=range] { flex: 1; max-width: 180px; accent-color: var(--flame); }
+  /* ---- desktop: lade links ---- */
+  .sheet .lidrow button { border: 1px solid var(--ash); background: rgba(255,255,255,.06); color: var(--cream); font: 500 12px/1 var(--font-body); padding: 9px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
+  .sheet .lidrow button svg { width: 14px; height: 14px; }
+  .sheet .lidrow button.is-open { border-color: var(--flame); }
+  @media (min-width: 721px) and (hover: hover) {
+    .bgbar, .innerbar { display: none !important; }
+    .lid-btn { display: none; }
+    .opt-btn { display: inline-flex; top: 46px; left: 24px; bottom: auto; }
+    .sheet { display: block; position: absolute; top: 0; bottom: 0; left: 0; right: auto; width: 300px; max-height: none; border-radius: 0 18px 18px 0; padding: 16px 18px 18px; transform: translateX(-24px); opacity: 0; pointer-events: none; transition: transform .28s ease, opacity .28s ease; background: rgba(28,26,23,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 8px 0 30px rgba(0,0,0,.35); }
+    body.sheet-open .sheet { transform: none; opacity: 1; pointer-events: auto; }
+    .sheet .grip { display: none; }
+    .sheet-bg { position: absolute; background: transparent; }
+  }
   .photo-tools { display: none; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .stage-wrap.has-photo .photo-tools { display: flex; }
   .photo-tools label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fog); }
@@ -823,6 +836,16 @@
     bg.addEventListener('click', close);
     var mirrors = [];
     function h4(t) { var e = document.createElement('h4'); e.textContent = t; sheet.appendChild(e); }
+    // deksel
+    (function () {
+      var lid = document.getElementById('lidBtn');
+      var r = document.createElement('div'); r.className = 'row lidrow'; r.innerHTML = '<span>Deksel</span>';
+      var b = document.createElement('button'); b.type = 'button';
+      function sync() { var open = lid.getAttribute('data-lid') === 'open'; b.textContent = open ? 'Deksel dicht' : 'Deksel open'; b.classList.toggle('is-open', open); }
+      b.addEventListener('click', function () { lid.click(); setTimeout(sync, 50); });
+      new MutationObserver(sync).observe(lid, { attributes: true, attributeFilter: ['data-lid'] });
+      sync(); r.appendChild(b); sheet.appendChild(r);
+    })();
     // achtergrond: chips-rij
     h4('Achtergrond');
     var chips = document.createElement('div'); chips.className = 'chips'; sheet.appendChild(chips);
