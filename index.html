@@ -762,7 +762,7 @@
   // ---- wijzerplaat van de thermometer ----
   function drawDial(logoImg) {
     var N = 1024, c = document.createElement('canvas'); c.width = N; c.height = N;
-    var x = c.getContext('2d'), cx = N / 2, cy = N / 2, R = N * 0.47;
+    var x = c.getContext('2d'), cx = N / 2, cy = N / 2, R = N * 0.335;   // de projectie dekt de hele behuizing (9 cm); de zichtbare plaat is 6,2 cm
     x.fillStyle = '#0b0b0c'; x.fillRect(0, 0, N, N);
     x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.fillStyle = '#101113'; x.fill();
     x.beginPath(); x.arc(cx, cy, R * 0.985, 0, Math.PI * 2); x.strokeStyle = '#3a3b3e'; x.lineWidth = N * 0.012; x.stroke();
@@ -790,7 +790,7 @@
     return c;
   }
   function applyDial() {
-    var m = matByName('glass'); if (!m) return;
+    var m = matByName('dialface'); if (!m) return;
     var finish = function (logoImg) {
       drawDial(logoImg).toBlob(function (blob) {
         var url = URL.createObjectURL(blob);
