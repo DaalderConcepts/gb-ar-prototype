@@ -332,7 +332,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         Sluiten
       </button>
-      <div class="hint">Sleep om te draaien · knijp om te zoomen</div>
+      <div class="hint">Sleep om te draaien · knijp om te zoomen · tik op de deksel om hem te openen</div>
       <div class="loading">Model wordt opgebouwd…</div>
     </div>
     <div class="bgbar" role="group" aria-label="Achtergrond">
@@ -468,11 +468,12 @@
   }
   applyCamera();
   (function () {
-    var pts = new Map(), lastX = 0, lastY = 0, pinch0 = 0, r0 = 0;
+    var pts = new Map(), lastX = 0, lastY = 0, pinch0 = 0, r0 = 0, tap = null;
     function dist() { var a = Array.from(pts.values()); return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); }
     mv.addEventListener('pointerdown', function (e) {
       if (e.target.closest('button, label, .sheet, .sheet-bg')) return;
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); lastX = e.clientX; lastY = e.clientY;
+      tap = { x: e.clientX, y: e.clientY, t: performance.now(), n: pts.size };
       cam.dragging = true; cam.lastInput = performance.now();
       if (pts.size === 2) { pinch0 = dist(); r0 = cam.radius; }
       try { mv.setPointerCapture(e.pointerId); } catch (err) {}
@@ -487,7 +488,14 @@
       cam.phi = Math.min(92, Math.max(5, cam.phi - dy * 0.3));
       applyCamera();
     });
-    function up(e) { pts.delete(e.pointerId); if (!pts.size) cam.dragging = false; }
+    function up(e) {
+      // tik op de deksel (korte, stilstaande aanraking boven de naad) opent of sluit hem
+      if (tap && tap.n === 1 && performance.now() - tap.t < 400 && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 8) {
+        try { var hit = mv.positionAndNormalFromPoint(e.clientX, e.clientY); if (hit && hit.position.y > 0.86) document.getElementById('lidBtn').click(); } catch (err) {}
+      }
+      tap = null;
+      pts.delete(e.pointerId); if (!pts.size) cam.dragging = false;
+    }
     mv.addEventListener('pointerup', up); mv.addEventListener('pointercancel', up);
     mv.addEventListener('wheel', function (e) {
       if (e.target.closest && e.target.closest('.sheet')) return;   // scrollen in de lade is geen zoom
