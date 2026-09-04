@@ -302,7 +302,7 @@
         field-of-view="28deg"
         shadow-intensity="1.1" shadow-softness="0.8"
         exposure="1.7" tone-mapping="neutral"
-        ar ar-modes="webxr quick-look" ar-scale="auto" ar-placement="floor"
+        ar ar-modes="webxr quick-look" ar-scale="fixed" ar-placement="floor"
         interaction-prompt="none">
         <button slot="ar-button" class="ar-btn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></svg>
@@ -860,8 +860,13 @@
   mv.addEventListener('ar-status', function (e) {
     var hint = document.getElementById('arHint');
     if (e.detail.status === 'session-started') {
-      hint.classList.add('is-on'); setTimeout(function () { hint.classList.remove('is-on'); }, 6000);
+      hint.textContent = 'Houd je telefoon stil en richt op een lege plek op de vloer. De kamado verschijnt daar op ware grootte.';
+      hint.classList.add('is-on');
       if (!innerState.zone) { setVisible('placering', true); setTimeout(function () { if (!innerState.zone) setVisible('placering', false); }, 8000); }
+    }
+    else if (e.detail.status === 'object-placed') {
+      hint.textContent = 'Geplaatst op ware grootte · pak de kamado binnen de oranje ring om hem te verschuiven · draai met twee vingers';
+      hint.classList.add('is-on'); setTimeout(function () { hint.classList.remove('is-on'); }, 7000);
     }
     else hint.classList.remove('is-on');
   });
@@ -924,7 +929,7 @@
     })();
     (function () {
       var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Schalen in AR <small style="display:block;font-size:11px;color:var(--fog)">Uit = altijd ware grootte; aan = knijpen om te vergroten of verkleinen</small></span>';
-      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw is-on'; sw.setAttribute('aria-label', 'Schalen in AR');
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Schalen in AR');
       sw.addEventListener('click', function () { var on = !sw.classList.contains('is-on'); sw.classList.toggle('is-on', on); mv.setAttribute('ar-scale', on ? 'auto' : 'fixed'); });
       r.appendChild(sw); sheet.appendChild(r);
     })();
