@@ -469,7 +469,7 @@
   }
   applyCamera();
   (function () {
-    var pts = new Map(), lastX = 0, lastY = 0, pinch0 = 0, r0 = 0, tap = null;
+    var pts = new Map(), lastX = 0, lastY = 0, pinch0 = 0, r0 = 0, tap = null, lastTap = 0;
     function dist() { var a = Array.from(pts.values()); return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); }
     mv.addEventListener('pointerdown', function (e) {
       if (e.target.closest('button, label, .sheet, .sheet-bg')) return;
@@ -492,7 +492,13 @@
     function up(e) {
       // tik op de deksel (korte, stilstaande aanraking boven de naad) opent of sluit hem
       if (tap && tap.n === 1 && performance.now() - tap.t < 400 && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 8) {
-        try { var hit = mv.positionAndNormalFromPoint(e.clientX, e.clientY); if (hit && hit.position.y > 0.86) document.getElementById('lidBtn').click(); } catch (err) {}
+        if (document.body.classList.contains('ar-active')) {
+          // in AR werkt de hit-test van model-viewer niet op de XR-camera: dubbeltik opent of sluit de deksel
+          var now = performance.now();
+          if (now - lastTap < 350) { document.getElementById('lidBtn').click(); lastTap = 0; } else lastTap = now;
+        } else {
+          try { var hit = mv.positionAndNormalFromPoint(e.clientX, e.clientY); if (hit && hit.position.y > 0.86) document.getElementById('lidBtn').click(); } catch (err) {}
+        }
       }
       tap = null;
       pts.delete(e.pointerId); if (!pts.size) cam.dragging = false;
@@ -878,7 +884,7 @@
       if (!innerState.zone) { setVisible('placering', true); setTimeout(function () { if (!innerState.zone) setVisible('placering', false); }, 8000); }
     }
     else if (e.detail.status === 'object-placed') {
-      hint.textContent = 'Geplaatst op ware grootte · pak de kamado binnen de oranje ring om hem te verschuiven · draai met twee vingers';
+      hint.textContent = 'Geplaatst op ware grootte · pak de kamado binnen de oranje ring om hem te verschuiven · draai met twee vingers · dubbeltik voor de deksel';
       hint.classList.add('is-on'); setTimeout(function () { hint.classList.remove('is-on'); }, 7000);
     }
     else hint.classList.remove('is-on');
