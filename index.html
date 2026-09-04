@@ -184,7 +184,8 @@
   .sheet .share a, .sheet .share button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-body); padding: 9px 12px; border-radius: 16px; text-decoration: none; cursor: pointer; }
   .sheet .share svg { width: 14px; height: 14px; }
   .sheet .share .ok { border-color: var(--flame); }
-  @media (hover: none) and (pointer: coarse) { .sheet .qrrow { display: none; } }
+  @media (hover: none) and (pointer: coarse) { .sheet .qrrow, .sheet .fsmirror { display: none; } }
+  body.is-touch .sheet .qrrow, body.is-touch .sheet .fsmirror, body.ar-active .sheet .qrrow, body.ar-active .sheet .fsmirror { display: none; }
   /* ---- desktop: lade links ---- */
   .sheet .lidrow button { border: 1px solid var(--ash); background: rgba(255,255,255,.06); color: var(--cream); font: 500 12px/1 var(--font-body); padding: 9px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
   .sheet .lidrow button svg { width: 14px; height: 14px; }
@@ -865,8 +866,10 @@
   mv.addEventListener('load', function () { setTimeout(window.__applyDial, 120); setTimeout(window.__applyDial, 3000); });
 
   // AR-hint: tonen zodra de sessie loopt, na 6 s weer weg
+  if (matchMedia('(hover: none)').matches || 'ontouchstart' in window) document.body.classList.add('is-touch');
   mv.addEventListener('ar-status', function (e) {
     var hint = document.getElementById('arHint');
+    document.body.classList.toggle('ar-active', e.detail.status !== 'not-presenting' && e.detail.status !== 'failed');
     if (e.detail.status === 'session-started') {
       hint.textContent = 'Houd je telefoon stil en richt op een lege plek op de vloer. De kamado verschijnt daar op ware grootte.';
       hint.classList.add('is-on');
@@ -888,6 +891,13 @@
     // volledig scherm op desktop: lade standaard open
     var fsBtn = document.getElementById('fsOpen'); if (fsBtn) fsBtn.addEventListener('click', function () { if (matchMedia('(min-width: 721px)').matches) setTimeout(open, 50); });
     document.getElementById('sheetClose').addEventListener('click', close);
+    (function () {   // omlaag vegen sluit de sheet, alleen als hij bovenaan staat
+      var y0 = null, dy = 0;
+      sheet.addEventListener('touchstart', function (e) { if (sheet.scrollTop > 0 || e.target.closest('input[type=range], .chips')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none'; }, { passive: true });
+      sheet.addEventListener('touchmove', function (e) { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); if (dy > 0 && matchMedia('(max-width: 720px), (hover: none)').matches) sheet.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
+      function end() { if (y0 === null) return; sheet.style.transition = ''; sheet.style.transform = ''; if (dy > 90) close(); y0 = null; dy = 0; }
+      sheet.addEventListener('touchend', end); sheet.addEventListener('touchcancel', end);
+    })();
     document.getElementById('sheetFs').addEventListener('click', function () { document.getElementById(document.body.classList.contains('fs-open') ? 'fsClose' : 'fsOpen').click(); });
     bg.addEventListener('click', close);
     var mirrors = [];
