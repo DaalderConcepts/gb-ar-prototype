@@ -558,6 +558,8 @@
     setTimeout(applyInner, 50);
     // hout: onder de echte lucht trekt de walnoot naar roze; iets warmer en donkerder multipliceren
     // de bleke tafels waren luchtreflectie op vlak hout: ruwer maken, en de tint naar donker walnoot
+    // gietijzer zwarter
+    try { ['castiron', 'orgcast'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.085, 0.083, 0.08, 1]); }); } catch (e) {}
     // binnenkeramiek: gebroken wit in plaats van spierwit (deflectors een tint lichter)
     try { ['interior', 'segment'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.60, 0.54, 0.44, 1]); }); ['deflector', 'orgdefl'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.68, 0.62, 0.52, 1]); }); } catch (e) {}
     try { var wm = matByName('wood'); wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.38, 0.28, 0.21, 1]); } catch (e) {}
