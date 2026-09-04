@@ -143,6 +143,11 @@
   .sheet .chips { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; scrollbar-width: none; }
   .sheet .chips button { flex: none; border: 1px solid #44413c; background: transparent; color: var(--cream); font: 12px/1 var(--font-body); padding: 8px 12px; border-radius: 16px; white-space: nowrap; }
   .sheet .chips button.is-on { border-color: var(--flame); }
+  .sheet .fsmirror { position: absolute; top: 10px; right: 52px; width: 32px; height: 32px; border-radius: 16px; border: 0; background: #3a3733; color: var(--cream); display: grid; place-items: center; }
+  .sheet .fsmirror svg { width: 15px; height: 15px; }
+  .sheet .fsmirror svg.x { display: none; }
+  body.fs-open .sheet .fsmirror svg { display: none; }
+  body.fs-open .sheet .fsmirror svg.x { display: block; }
   .sheet .close { position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border-radius: 16px; border: 0; background: #3a3733; color: var(--cream); font-size: 16px; }
   body.sheet-open .sheet-bg { display: block; }
   body.sheet-open .sheet { display: block; transform: translateY(0); }
@@ -314,6 +319,7 @@
     <div class="sheet-bg" id="sheetBg"></div>
     <div class="sheet" id="sheet" role="dialog" aria-label="Opties">
       <div class="grip"></div>
+      <button type="button" class="fsmirror" id="sheetFs" aria-label="Volledig scherm" title="Volledig scherm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg></button>
       <button type="button" class="close" id="sheetClose" aria-label="Sluiten">×</button>
     </div>
         <div class="hud"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
@@ -869,6 +875,7 @@
     // volledig scherm op desktop: lade standaard open
     var fsBtn = document.getElementById('fsOpen'); if (fsBtn) fsBtn.addEventListener('click', function () { if (matchMedia('(min-width: 721px)').matches) setTimeout(open, 50); });
     document.getElementById('sheetClose').addEventListener('click', close);
+    document.getElementById('sheetFs').addEventListener('click', function () { document.getElementById(document.body.classList.contains('fs-open') ? 'fsClose' : 'fsOpen').click(); });
     bg.addEventListener('click', close);
     var mirrors = [];
     function h4(t) { var e = document.createElement('h4'); e.textContent = t; sheet.appendChild(e); }
