@@ -557,6 +557,7 @@
     setVisible('multilevel', innerState.multilevel);
     setVisible('basket', innerState.basket);
     setVisible('placering', innerState.zone);
+    try { var pr = matByName('placering'); if (pr) pr.setEmissiveFactor([1.0, 0.45, 0.06]); } catch (e) {}   // ring licht altijd op, ook in de schaduw en in AR
     setVisible('orgcast', innerState.organizer); setVisible('orginox', innerState.organizer); setVisible('orgdefl', innerState.organizer);
     document.querySelectorAll('[data-inner=inox],[data-inner=cast],[data-inner=deflector]').forEach(function (c) { c.disabled = !innerState.multilevel; c.style.opacity = innerState.multilevel ? '' : '.35'; });
     document.querySelectorAll('[data-inner]').forEach(function (c) {
