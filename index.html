@@ -581,6 +581,7 @@
     setVisible('basket', innerState.basket);
     setVisible('placering', innerState.zone);
     setVisible('ventc', !innerState.vent); setVisible('vento', innerState.vent);
+    setVisible('perfc', !innerState.vent && !innerState.ash); setVisible('perfo', innerState.vent && !innerState.ash);   // lade uit = geperforeerde plaat weg
     setVisible('ashi', !innerState.ash); setVisible('asho', innerState.ash);
     try { var pr = matByName('placering'); if (pr) pr.setEmissiveFactor([1.0, 0.45, 0.06]); } catch (e) {}   // ring licht altijd op, ook in de schaduw en in AR
     setVisible('orgcast', innerState.organizer); setVisible('orginox', innerState.organizer); setVisible('orgdefl', innerState.organizer);
