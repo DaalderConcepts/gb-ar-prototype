@@ -153,6 +153,10 @@
     .fs-btn { display: none; }
     .sheet { display: block; }
   }
+  .light-chip { gap: 8px; cursor: default; }
+  .light-chip input { width: 110px; accent-color: var(--flame); margin: 0; }
+  .light-chip output { font-family: var(--font-mono); font-size: 10px; color: var(--fog); min-width: 34px; }
+  .sheet .row input[type=range] { flex: 1; max-width: 180px; accent-color: var(--flame); }
   .photo-tools { display: none; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .stage-wrap.has-photo .photo-tools { display: flex; }
   .photo-tools label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--fog); }
@@ -314,6 +318,7 @@
       <button type="button" class="chip is-on" data-inner="organizer" data-val="on">Grate organizer gevuld</button>
       <span class="lbl" style="margin-left:10px">Weergave</span>
       <button type="button" class="chip is-on" data-autorotate aria-pressed="true">Automatisch draaien</button>
+      <label class="chip light-chip">Licht <input type="range" id="lightRange" min="50" max="200" value="100" aria-label="Lichtsterkte op de kamado"><output id="lightOut">100%</output></label>
     </div>
     <div class="photo-tools">
       <label>Foto <input type="range" id="photoShift" min="-50" max="50" value="0" aria-label="Foto verticaal verschuiven"></label>
@@ -646,16 +651,18 @@
       c.toBlob(function (blob) { var u = URL.createObjectURL(blob) + '#.png'; envCache[key] = { url: u, lum: lum, psi: psi }; res(envCache[key]); }, 'image/png');
     });
   }
+  var lightScale = 1;
+  function setExposure(v) { cam.baseExposure = v; mv.exposure = v * lightScale; }
   function applyEnv(name) {
     var img = name === 'photo' ? photo : presetImgs[name];
     // de echte lucht is ruim helderder dan de oude synthetische; studio op 0,65 geeft weer antraciet
-    if (!img) { mv.environmentImage = window.__HDR_URL; mv.exposure = 1.7; mv.shadowIntensity = 1.0; cam.theta = SUN_AZ - 135; applyCamera(); return; }
+    if (!img) { mv.environmentImage = window.__HDR_URL; setExposure(1.7); mv.shadowIntensity = 1.0; cam.theta = SUN_AZ - 135; applyCamera(); return; }
     envFromImage(name === 'photo' ? 'photo-' + (photo.width + 'x' + photo.height) : name, img).then(function (env) {
       if (current !== name) return;
       // de HDR-lucht blijft de lichtbron (echte zon, geen kleurzweem van het gras); de foto bepaalt alleen de exposure
       mv.environmentImage = window.__HDR_URL;
       // lichte foto = meer exposure, zodat de matzwarte kamado niet wegvalt tegen de tuin
-      mv.exposure = Math.min(2.6, Math.max(1.4, 1.2 + env.lum * 1.8));
+      setExposure(Math.min(2.6, Math.max(1.4, 1.2 + env.lum * 1.8)));
       mv.shadowIntensity = 0.9; mv.shadowSoftness = 0.6;
       cam.theta = SUN_AZ - env.psi; applyCamera();
     });
@@ -673,6 +680,13 @@
     draw();
   }
   document.querySelectorAll('button.chip[data-bg]').forEach(function (c) { c.addEventListener('click', function () { setBg(c.getAttribute('data-bg')); }); });
+  var lightRange = document.getElementById('lightRange'), lightOut = document.getElementById('lightOut');
+  cam.baseExposure = cam.baseExposure || 1.7;
+  lightRange.addEventListener('input', function () {
+    lightScale = +lightRange.value / 100; lightOut.textContent = lightRange.value + '%';
+    mv.exposure = cam.baseExposure * lightScale;
+    document.querySelectorAll('[data-light-mirror]').forEach(function (m) { if (m !== lightRange) m.value = lightRange.value; });
+  });
   document.getElementById('photoInput').addEventListener('change', function (e) {
     var f = e.target.files && e.target.files[0];
     if (!f) return;
@@ -794,6 +808,13 @@
       var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Automatisch draaien');
       sw.addEventListener('click', function () { src.click(); });
       r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
+    })();
+    (function () {
+      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Licht</span>';
+      var inp = document.createElement('input'); inp.type = 'range'; inp.min = 50; inp.max = 200; inp.value = 100; inp.setAttribute('data-light-mirror', ''); inp.setAttribute('aria-label', 'Lichtsterkte op de kamado');
+      var src = document.getElementById('lightRange');
+      inp.addEventListener('input', function () { src.value = inp.value; src.dispatchEvent(new Event('input')); });
+      r.appendChild(inp); sheet.appendChild(r);
     })();
     function sync() { mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); }); }
     var mo = new MutationObserver(sync);
