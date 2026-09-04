@@ -186,6 +186,9 @@
   .sheet .share .ok { border-color: var(--flame); }
   @media (hover: none) and (pointer: coarse) { .sheet .qrrow, .sheet .fsmirror { display: none; } }
   body.is-touch .sheet .qrrow, body.is-touch .sheet .fsmirror, body.ar-active .sheet .qrrow, body.ar-active .sheet .fsmirror { display: none; }
+  .sheet .ar-only { display: none; }
+  body.ar-active .sheet .row.ar-only { display: flex; }
+  body.ar-active .sheet h4.ar-only { display: block; }
   /* ---- desktop: lade links ---- */
   .sheet .lidrow button { border: 1px solid var(--ash); background: rgba(255,255,255,.06); color: var(--cream); font: 500 12px/1 var(--font-body); padding: 9px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
   .sheet .lidrow button svg { width: 14px; height: 14px; }
@@ -574,6 +577,15 @@
   // gietijzer zit niet als aparte geometrie in het CAD: dezelfde halve manen, zwart en mat
   // twee lagen: rvs = het ronde staafrooster (boven), gietijzer = de geslotte halve manen (onder). Nooit beide.
   function setGrates(inox, cast) { setVisible('gratetop', inox); setVisible('castiron', cast); }
+  // camera-sprong (vaste camera, dus het model draait): 'front-low' = voorkant laag, 'back' = achterkant
+  function jumpTo(where) {
+    try {
+      cam.rotate = false; var rb = document.querySelector('[data-autorotate]'); if (rb) { rb.classList.remove('is-on'); rb.classList.add('is-off'); }
+      cam.yaw = cam.theta - 30 + (where === 'back' ? 180 : 0);
+      if (where === 'front-low') { cam.phi = 82; cam.radius = 1.7; mv.cameraTarget = '0m 0.45m 0m'; } else { cam.phi = 74; cam.radius = 2.6; mv.cameraTarget = '0m 0.62m 0m'; }
+      applyCamera();
+    } catch (e) {}
+  }
   function applyInner() {
     // roosters en deflectors horen bij het multilevel-systeem: zonder systeem ook geen roosters/deflectors
     setGrates(innerState.multilevel && innerState.inox, innerState.multilevel && innerState.cast);
@@ -587,7 +599,6 @@
     setVisible('ashi', !innerState.ash); setVisible('asho', innerState.ash);
     try { var pr = matByName('placering'); if (pr) pr.setEmissiveFactor([1.0, 0.45, 0.06]); } catch (e) {}   // ring licht altijd op, ook in de schaduw en in AR
     setVisible('orgcast', innerState.organizer); setVisible('orginox', innerState.organizer); setVisible('orgdefl', innerState.organizer);
-    document.querySelectorAll('[data-inner=inox],[data-inner=cast],[data-inner=deflector]').forEach(function (c) { c.disabled = !innerState.multilevel; c.style.opacity = innerState.multilevel ? '' : '.35'; });
     document.querySelectorAll('[data-inner]').forEach(function (c) {
       var k = c.getAttribute('data-inner'), v = c.getAttribute('data-val');
       c.classList.toggle('is-on', innerState[k]); c.classList.toggle('is-off', !innerState[k]);
@@ -600,6 +611,11 @@
       // rvs en gietijzer sluiten elkaar uit: rvs = alleen bovenste laag, gietijzer = alleen onderste laag
       if (k === 'inox' && innerState.inox) innerState.cast = false;
       if (k === 'cast' && innerState.cast) innerState.inox = false;
+      // roosters of deflectors aanzetten zet het multilevel-systeem vanzelf aan
+      if ((k === 'inox' || k === 'cast' || k === 'deflector') && innerState[k]) innerState.multilevel = true;
+      // aslade uit = ventilatieschuif open, en de camera naar de voorkant onderin; organizer aan = camera naar de achterkant
+      if (k === 'ash') { innerState.vent = innerState.ash; if (innerState.ash && !document.body.classList.contains('ar-active')) jumpTo('front-low'); }
+      if (k === 'organizer' && innerState.organizer && !document.body.classList.contains('ar-active')) jumpTo('back');
       applyInner();
     });
   });
@@ -917,6 +933,15 @@
     bg.addEventListener('click', close);
     var mirrors = [];
     function h4(t) { var e = document.createElement('h4'); e.textContent = t; sheet.appendChild(e); }
+    // achtergrond bovenaan
+    h4('Achtergrond');
+    var chips = document.createElement('div'); chips.className = 'chips'; sheet.appendChild(chips);
+    document.querySelectorAll('.bgbar [data-bg]').forEach(function (src) {
+      var b = document.createElement('button'); b.type = 'button';
+      b.textContent = src.getAttribute('data-bg') === 'photo' ? 'Eigen foto' : src.textContent.trim();
+      b.addEventListener('click', function () { var inp = src.querySelector('input'); if (inp) inp.click(); else src.click(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); });
+      chips.appendChild(b); mirrors.push([src, b]);
+    });
     // deksel
     (function () {
       var lid = document.getElementById('lidBtn');
@@ -927,17 +952,7 @@
       new MutationObserver(sync).observe(lid, { attributes: true, attributeFilter: ['data-lid'] });
       sync(); r.appendChild(b); sheet.appendChild(r);
     })();
-    // achtergrond: chips-rij
-    h4('Achtergrond');
-    var chips = document.createElement('div'); chips.className = 'chips'; sheet.appendChild(chips);
-    document.querySelectorAll('.bgbar [data-bg]').forEach(function (src) {
-      var b = document.createElement('button'); b.type = 'button';
-      b.textContent = src.getAttribute('data-bg') === 'photo' ? 'Eigen foto' : src.textContent.trim();
-      b.addEventListener('click', function () { var inp = src.querySelector('input'); if (inp) inp.click(); else src.click(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); });
-      chips.appendChild(b); mirrors.push([src, b]);
-    });
-    // binnenwerk: roosters als segment, de rest als schakelaar
-    h4('Binnenwerk');
+    // roosters als segment
     var row = document.createElement('div'); row.className = 'row'; row.innerHTML = '<span>Roosters</span>'; sheet.appendChild(row);
     var seg = document.createElement('div'); seg.className = 'seg'; row.appendChild(seg);
     [['inox', 'Rvs'], ['cast', 'Gietijzer']].forEach(function (p) {
@@ -946,34 +961,21 @@
       b.addEventListener('click', function () { if (!src.classList.contains('is-on')) src.click(); });
       seg.appendChild(b); mirrors.push([src, b]);
     });
-    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld'], ['vent', 'Ventilatie onder half open'], ['ash', 'Aslade 80% uit'], ['tables', 'Zijtafels uitgeklapt']].forEach(function (p) {
-      var src = document.querySelector('[data-inner="' + p[0] + '"]');
-      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>' + p[1] + '</span>';
-      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', p[1]);
+    function toggleRow(key, label, extraClass) {
+      var src = document.querySelector('[data-inner="' + key + '"], [data-autorotate]' + (key === 'autorotate' ? '' : '.nope'));
+      if (key === 'autorotate') src = document.querySelector('[data-autorotate]');
+      var r = document.createElement('div'); r.className = 'row' + (extraClass ? ' ' + extraClass : ''); r.innerHTML = '<span>' + label + '</span>';
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', label.replace(/<[^>]+>/g, ''));
       sw.addEventListener('click', function () { src.click(); });
       r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
-    });
-    (function () {
-      var src = document.querySelector('[data-inner="zone"]');
-      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Verplaatszone <small style="display:block;font-size:11px;color:var(--fog)">Oranje ring op de vloer: pak de kamado hierbinnen om hem te verplaatsen</small></span>';
-      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Verplaatszone');
-      sw.addEventListener('click', function () { src.click(); });
-      r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
-    })();
-    (function () {
-      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Schalen in AR <small style="display:block;font-size:11px;color:var(--fog)">Uit = altijd ware grootte; aan = knijpen om te vergroten of verkleinen</small></span>';
-      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Schalen in AR');
-      sw.addEventListener('click', function () { var on = !sw.classList.contains('is-on'); sw.classList.toggle('is-on', on); mv.setAttribute('ar-scale', on ? 'auto' : 'fixed'); });
-      r.appendChild(sw); sheet.appendChild(r);
-    })();
-    h4('Weergave');
-    (function () {
-      var src = document.querySelector('[data-autorotate]');
-      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Automatisch draaien</span>';
-      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Automatisch draaien');
-      sw.addEventListener('click', function () { src.click(); });
-      r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
-    })();
+    }
+    toggleRow('deflector', 'Heat deflectors');
+    toggleRow('multilevel', 'Multilevel-systeem');
+    toggleRow('basket', 'Houtskoolmand');
+    toggleRow('ash', 'Aslade uit');
+    toggleRow('organizer', 'Grate organizer');
+    toggleRow('tables', 'Zijtafels uitgeklapt');
+    toggleRow('autorotate', 'Automatisch draaien');
     (function () {
       var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Licht</span>';
       var inp = document.createElement("input"); inp.type = "range"; inp.min = 50; inp.max = 350; inp.value = 180; inp.setAttribute('data-light-mirror', ''); inp.setAttribute('aria-label', 'Lichtsterkte op de kamado');
@@ -1014,6 +1016,15 @@
       btn(I.msgr, 'Messenger', 'fb-messenger://share/?link=' + enc);
       if (navigator.share) { var sh = btn(I.share, 'Delen via…'); sh.addEventListener('click', function () { navigator.share({ title: 'Grill Bill kamado in 3D en AR', url: SHARE_URL }).catch(function () {}); }); }
       sheet.appendChild(wrap);
+    })();
+    // alleen in AR: verplaatszone en schalen
+    (function () {
+      var hh = document.createElement('h4'); hh.className = 'ar-only'; hh.textContent = 'In AR'; sheet.appendChild(hh);
+      toggleRow('zone', 'Verplaatszone <small style="display:block;font-size:11px;color:var(--fog)">Oranje ring op de vloer: pak de kamado hierbinnen om hem te verplaatsen</small>', 'ar-only');
+      var r = document.createElement('div'); r.className = 'row ar-only'; r.innerHTML = '<span>Schalen <small style="display:block;font-size:11px;color:var(--fog)">Uit = altijd ware grootte; aan = knijpen om te vergroten of verkleinen</small></span>';
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Schalen in AR');
+      sw.addEventListener('click', function () { var on = !sw.classList.contains('is-on'); sw.classList.toggle('is-on', on); mv.setAttribute('ar-scale', on ? 'auto' : 'fixed'); });
+      r.appendChild(sw); sheet.appendChild(r);
     })();
     function sync() {
       mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); });
