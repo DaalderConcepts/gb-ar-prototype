@@ -682,7 +682,7 @@
   }
   document.querySelectorAll('button.chip[data-bg]').forEach(function (c) { c.addEventListener('click', function () { setBg(c.getAttribute('data-bg')); }); });
   var lightRange = document.getElementById('lightRange'), lightOut = document.getElementById('lightOut');
-  cam.baseExposure = cam.baseExposure || 1.7;
+  cam.baseExposure = cam.baseExposure || 1.7; mv.exposure = cam.baseExposure * lightScale;   // standaardstand direct toepassen
   lightRange.addEventListener('input', function () {
     lightScale = +lightRange.value / 100; lightOut.textContent = lightRange.value + '%';
     mv.exposure = cam.baseExposure * lightScale;
