@@ -318,7 +318,7 @@
       <button type="button" class="chip is-on" data-inner="organizer" data-val="on">Grate organizer gevuld</button>
       <span class="lbl" style="margin-left:10px">Weergave</span>
       <button type="button" class="chip is-on" data-autorotate aria-pressed="true">Automatisch draaien</button>
-      <label class="chip light-chip">Licht <input type="range" id="lightRange" min="50" max="200" value="100" aria-label="Lichtsterkte op de kamado"><output id="lightOut">100%</output></label>
+      <label class="chip light-chip">Licht <input type="range" id="lightRange" min="50" max="250" value="180" aria-label="Lichtsterkte op de kamado"><output id="lightOut">180%</output></label>
     </div>
     <div class="photo-tools">
       <label>Foto <input type="range" id="photoShift" min="-50" max="50" value="0" aria-label="Foto verticaal verschuiven"></label>
@@ -652,7 +652,7 @@
       c.toBlob(function (blob) { var u = URL.createObjectURL(blob) + '#.png'; envCache[key] = { url: u, lum: lum, psi: psi }; res(envCache[key]); }, 'image/png');
     });
   }
-  var lightScale = 1;
+  var lightScale = 1.8;   // standaard 180%, op verzoek van Bobby
   function setExposure(v) { cam.baseExposure = v; mv.exposure = v * lightScale; }
   function applyEnv(name) {
     var img = name === 'photo' ? photo : presetImgs[name];
@@ -859,7 +859,7 @@
     })();
     (function () {
       var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Licht</span>';
-      var inp = document.createElement('input'); inp.type = 'range'; inp.min = 50; inp.max = 200; inp.value = 100; inp.setAttribute('data-light-mirror', ''); inp.setAttribute('aria-label', 'Lichtsterkte op de kamado');
+      var inp = document.createElement("input"); inp.type = "range"; inp.min = 50; inp.max = 250; inp.value = 180; inp.setAttribute('data-light-mirror', ''); inp.setAttribute('aria-label', 'Lichtsterkte op de kamado');
       var src = document.getElementById('lightRange');
       inp.addEventListener('input', function () { src.value = inp.value; src.dispatchEvent(new Event('input')); });
       r.appendChild(inp); sheet.appendChild(r);
