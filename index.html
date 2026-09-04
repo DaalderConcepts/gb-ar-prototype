@@ -149,7 +149,7 @@
   @media (hover: none) and (pointer: coarse), (max-width: 720px) {
     .bgbar, .innerbar { display: none !important; }
     .opt-btn { display: inline-flex; }
-    .lid-btn { top: auto; left: 12px; bottom: 58px; }
+    .lid-btn { display: none; }   /* deksel zit in de sheet, ook in AR */
     .fs-btn { display: none; }
     .sheet { display: block; }
   }
@@ -297,7 +297,7 @@
         field-of-view="28deg"
         shadow-intensity="1.1" shadow-softness="0.8"
         exposure="1.7" tone-mapping="neutral"
-        ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+        ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor"
         interaction-prompt="none">
         <button slot="ar-button" class="ar-btn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></svg>
@@ -310,7 +310,7 @@
       <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet" aria-label="Opties" title="Opties">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
       </button>
-      <div class="ar-hint" id="arHint" role="status">Pak de kamado binnen de oranje ring en sleep hem · draai met twee vingers · hij staat op ware grootte</div>
+      <div class="ar-hint" id="arHint" role="status">Pak de kamado binnen de oranje ring en sleep hem · draai met twee vingers · knijp om te schalen, hij start op ware grootte</div>
     <div class="sheet-bg" id="sheetBg"></div>
     <div class="sheet" id="sheet" role="dialog" aria-label="Opties">
       <div class="grip"></div>
@@ -914,6 +914,12 @@
       var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', 'Verplaatszone');
       sw.addEventListener('click', function () { src.click(); });
       r.appendChild(sw); sheet.appendChild(r); mirrors.push([src, sw]);
+    })();
+    (function () {
+      var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>Schalen in AR <small style="display:block;font-size:11px;color:var(--fog)">Uit = altijd ware grootte; aan = knijpen om te vergroten of verkleinen</small></span>';
+      var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw is-on'; sw.setAttribute('aria-label', 'Schalen in AR');
+      sw.addEventListener('click', function () { var on = !sw.classList.contains('is-on'); sw.classList.toggle('is-on', on); mv.setAttribute('ar-scale', on ? 'auto' : 'fixed'); });
+      r.appendChild(sw); sheet.appendChild(r);
     })();
     h4('Weergave');
     (function () {
