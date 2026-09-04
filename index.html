@@ -157,6 +157,13 @@
   .light-chip input { position: static; width: 110px; height: auto; opacity: 1; pointer-events: auto; accent-color: var(--flame); margin: 0; }
   .light-chip output { font-family: var(--font-mono); font-size: 10px; color: var(--fog); min-width: 34px; }
   .sheet .row input[type=range] { flex: 1; max-width: 180px; accent-color: var(--flame); }
+  /* icoonknoppen: rond, met een zachte groei-animatie als hint dat er meer is */
+  .fs-btn, .opt-btn { width: 40px; height: 40px; padding: 0; border-radius: 20px; justify-content: center; gap: 0; }
+  .fs-btn svg, .opt-btn svg { width: 18px; height: 18px; animation: grow 2.4s ease-in-out infinite; }
+  @keyframes grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.22); } }
+  body.sheet-open .opt-btn svg { animation: none; }
+  @media (prefers-reduced-motion: reduce) { .fs-btn svg, .opt-btn svg { animation: none; } }
+  .sheet .chips { scroll-behavior: smooth; }
   /* ---- desktop: lade links ---- */
   .sheet .lidrow button { border: 1px solid var(--ash); background: rgba(255,255,255,.06); color: var(--cream); font: 500 12px/1 var(--font-body); padding: 9px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
   .sheet .lidrow button svg { width: 14px; height: 14px; }
@@ -165,7 +172,7 @@
     .bgbar, .innerbar { display: none !important; }
     .lid-btn { display: none; }
     .opt-btn { display: inline-flex; top: 46px; left: 24px; bottom: auto; }
-    .sheet { display: block; position: absolute; top: 0; bottom: 0; left: 0; right: auto; width: 300px; max-height: none; border-radius: 0 18px 18px 0; padding: 16px 18px 18px; transform: translateX(-24px); opacity: 0; pointer-events: none; transition: transform .28s ease, opacity .28s ease; background: rgba(28,26,23,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 8px 0 30px rgba(0,0,0,.35); }
+    .sheet { display: block; position: absolute; top: 0; bottom: 0; left: 0; right: auto; width: 300px; max-height: none; border-radius: 0 18px 18px 0; padding: 52px 18px 18px; transform: translateX(-24px); opacity: 0; pointer-events: none; transition: transform .28s ease, opacity .28s ease; background: rgba(28,26,23,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 8px 0 30px rgba(0,0,0,.35); }
     body.sheet-open .sheet { transform: none; opacity: 1; pointer-events: auto; }
     .sheet .grip { display: none; }
     .sheet-bg { display: none !important; }   /* desktop: geen achtergrondlaag, zodat je met de lade open kunt draaien */
@@ -284,9 +291,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h16"/><path d="M6 13a6 6 0 0 1 12 0"/><path d="M5 13v4h14v-4"/></svg>
         <span>Deksel open</span>
       </button>
-      <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet">
+      <button type="button" class="opt-btn" id="optBtn" aria-haspopup="dialog" aria-controls="sheet" aria-label="Opties" title="Opties">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-        Opties
       </button>
       <div class="ar-hint" id="arHint" role="status">Sleep de kamado om hem te verplaatsen · draai met twee vingers · hij staat op ware grootte</div>
     <div class="sheet-bg" id="sheetBg"></div>
@@ -299,7 +305,6 @@
       <div class="readout"><span class="dot"></span> 3D · Large 21" · schaal 1:1</div>
       <button type="button" class="fs-btn" id="fsOpen" aria-label="Open op volledig scherm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-        Volledig scherm
       </button>
       <button type="button" class="fs-close" id="fsClose" aria-label="Sluit volledig scherm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
@@ -856,7 +861,7 @@
     document.querySelectorAll('.bgbar [data-bg]').forEach(function (src) {
       var b = document.createElement('button'); b.type = 'button';
       b.textContent = src.getAttribute('data-bg') === 'photo' ? 'Eigen foto' : src.textContent.trim();
-      b.addEventListener('click', function () { var inp = src.querySelector('input'); if (inp) inp.click(); else src.click(); });
+      b.addEventListener('click', function () { var inp = src.querySelector('input'); if (inp) inp.click(); else src.click(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); });
       chips.appendChild(b); mirrors.push([src, b]);
     });
     // binnenwerk: roosters als segment, de rest als schakelaar
@@ -891,7 +896,10 @@
       inp.addEventListener('input', function () { src.value = inp.value; src.dispatchEvent(new Event('input')); });
       r.appendChild(inp); sheet.appendChild(r);
     })();
-    function sync() { mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); }); }
+    function sync() {
+      mirrors.forEach(function (m) { m[1].classList.toggle('is-on', m[0].classList.contains('is-on')); });
+      var act = chips.querySelector('button.is-on'); if (act) act.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }
     var mo = new MutationObserver(sync);
     mirrors.forEach(function (m) { mo.observe(m[0], { attributes: true, attributeFilter: ['class'] }); });
     sync();
