@@ -358,6 +358,7 @@
       <button type="button" class="chip is-on" data-inner="basket" data-val="on">Houtskoolmand</button>
       <button type="button" class="chip is-on" data-inner="organizer" data-val="on">Grate organizer gevuld</button>
       <button type="button" class="chip is-off" data-inner="zone" data-val="on">Verplaatszone</button>
+      <button type="button" class="chip is-on" data-inner="tables" data-val="on">Zijtafels uitgeklapt</button>
       <button type="button" class="chip is-off" data-inner="vent" data-val="on">Ventilatie onder open</button>
       <button type="button" class="chip is-off" data-inner="ash" data-val="on">Aslade uit</button>
       <span class="lbl" style="margin-left:10px">Weergave</span>
@@ -560,7 +561,7 @@
 
   // ---- Binnenwerk ----
   function matByName(name) { return (mv.model && mv.model.materials || []).find(function (m) { return m.name === name; }); }
-  var innerState = { inox: true, cast: false, deflector: true, multilevel: true, organizer: true, basket: true, zone: false, vent: false, ash: false };
+  var innerState = { inox: true, cast: false, deflector: true, multilevel: true, organizer: true, basket: true, zone: false, vent: false, ash: false, tables: true };
   var hidden = {};
   function setVisible(name, on) {
     var m = matByName(name); if (!m) return;
@@ -580,6 +581,7 @@
     setVisible('multilevel', innerState.multilevel);
     setVisible('basket', innerState.basket);
     setVisible('placering', innerState.zone);
+    setVisible('tableup', innerState.tables); setVisible('tbup', innerState.tables); setVisible('tabledown', !innerState.tables); setVisible('tbdown', !innerState.tables);
     setVisible('ventc', !innerState.vent); setVisible('vento', innerState.vent);
     setVisible('perfc', !innerState.vent && !innerState.ash); setVisible('perfo', innerState.vent && !innerState.ash);   // lade uit = geperforeerde plaat weg
     setVisible('ashi', !innerState.ash); setVisible('asho', innerState.ash);
@@ -610,7 +612,7 @@
     try { ['castiron', 'orgcast'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.085, 0.083, 0.08, 1]); }); } catch (e) {}
     // binnenkeramiek: gebroken wit in plaats van spierwit (deflectors een tint lichter)
     try { ['interior', 'segment'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.60, 0.54, 0.44, 1]); }); ['deflector', 'orgdefl'].forEach(function (n) { var m = matByName(n); if (m) m.pbrMetallicRoughness.setBaseColorFactor([0.68, 0.62, 0.52, 1]); }); } catch (e) {}
-    try { var wm = matByName('wood'); wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.38, 0.28, 0.21, 1]); } catch (e) {}
+    try { ['wood', 'tableup', 'tabledown'].forEach(function (n) { var wm = matByName(n); if (!wm) return; wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.38, 0.28, 0.21, 1]); }); } catch (e) {}
   });
   // automatisch draaien aan/uit
   var rotBtn = document.querySelector('[data-autorotate]');
@@ -944,7 +946,7 @@
       b.addEventListener('click', function () { if (!src.classList.contains('is-on')) src.click(); });
       seg.appendChild(b); mirrors.push([src, b]);
     });
-    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld'], ['vent', 'Ventilatie onder half open'], ['ash', 'Aslade 80% uit']].forEach(function (p) {
+    [['deflector', 'Deflectors'], ['multilevel', 'Multilevel-systeem'], ['basket', 'Houtskoolmand'], ['organizer', 'Grate organizer gevuld'], ['vent', 'Ventilatie onder half open'], ['ash', 'Aslade 80% uit'], ['tables', 'Zijtafels uitgeklapt']].forEach(function (p) {
       var src = document.querySelector('[data-inner="' + p[0] + '"]');
       var r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<span>' + p[1] + '</span>';
       var sw = document.createElement('button'); sw.type = 'button'; sw.className = 'sw'; sw.setAttribute('aria-label', p[1]);
