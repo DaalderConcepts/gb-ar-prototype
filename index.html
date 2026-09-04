@@ -168,7 +168,7 @@
     .sheet { display: block; position: absolute; top: 0; bottom: 0; left: 0; right: auto; width: 300px; max-height: none; border-radius: 0 18px 18px 0; padding: 16px 18px 18px; transform: translateX(-24px); opacity: 0; pointer-events: none; transition: transform .28s ease, opacity .28s ease; background: rgba(28,26,23,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 8px 0 30px rgba(0,0,0,.35); }
     body.sheet-open .sheet { transform: none; opacity: 1; pointer-events: auto; }
     .sheet .grip { display: none; }
-    .sheet-bg { position: absolute; background: transparent; }
+    .sheet-bg { display: none !important; }   /* desktop: geen achtergrondlaag, zodat je met de lade open kunt draaien */
   }
   .photo-tools { display: none; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
   .stage-wrap.has-photo .photo-tools { display: flex; }
@@ -831,7 +831,9 @@
     var sheet = document.getElementById('sheet'), bg = document.getElementById('sheetBg');
     var open = function () { document.body.classList.add('sheet-open'); };
     var close = function () { document.body.classList.remove('sheet-open'); };
-    document.getElementById('optBtn').addEventListener('click', open);
+    document.getElementById('optBtn').addEventListener('click', function () { document.body.classList.toggle('sheet-open'); });
+    // volledig scherm op desktop: lade standaard open
+    var fsBtn = document.getElementById('fsOpen'); if (fsBtn) fsBtn.addEventListener('click', function () { if (matchMedia('(min-width: 721px)').matches) setTimeout(open, 50); });
     document.getElementById('sheetClose').addEventListener('click', close);
     bg.addEventListener('click', close);
     var mirrors = [];
