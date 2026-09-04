@@ -256,7 +256,7 @@
         camera-orbit="30deg 76deg 3.4m" min-camera-orbit="auto 5deg 1.2m" max-camera-orbit="auto 92deg 5.5m"
         field-of-view="28deg"
         shadow-intensity="1.1" shadow-softness="0.8"
-        exposure="0.9" tone-mapping="neutral"
+        exposure="1.7" tone-mapping="neutral"
         ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
         interaction-prompt="none">
         <button slot="ar-button" class="ar-btn" type="button">
@@ -534,7 +534,7 @@
     setTimeout(applyInner, 50);
     // hout: onder de echte lucht trekt de walnoot naar roze; iets warmer en donkerder multipliceren
     // de bleke tafels waren luchtreflectie op vlak hout: ruwer maken, en de tint naar donker walnoot
-    try { var wm = matByName('wood'); wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.50, 0.36, 0.27, 1]); } catch (e) {}
+    try { var wm = matByName('wood'); wm.pbrMetallicRoughness.setRoughnessFactor(0.9); wm.pbrMetallicRoughness.setBaseColorFactor([0.38, 0.28, 0.21, 1]); } catch (e) {}
   });
   // automatisch draaien aan/uit
   var rotBtn = document.querySelector('[data-autorotate]');
@@ -649,13 +649,13 @@
   function applyEnv(name) {
     var img = name === 'photo' ? photo : presetImgs[name];
     // de echte lucht is ruim helderder dan de oude synthetische; studio op 0,65 geeft weer antraciet
-    if (!img) { mv.environmentImage = window.__HDR_URL; mv.exposure = 0.9; mv.shadowIntensity = 1.1; cam.theta = SUN_AZ - 135; applyCamera(); return; }
+    if (!img) { mv.environmentImage = window.__HDR_URL; mv.exposure = 1.7; mv.shadowIntensity = 1.0; cam.theta = SUN_AZ - 135; applyCamera(); return; }
     envFromImage(name === 'photo' ? 'photo-' + (photo.width + 'x' + photo.height) : name, img).then(function (env) {
       if (current !== name) return;
       // de HDR-lucht blijft de lichtbron (echte zon, geen kleurzweem van het gras); de foto bepaalt alleen de exposure
       mv.environmentImage = window.__HDR_URL;
       // lichte foto = meer exposure, zodat de matzwarte kamado niet wegvalt tegen de tuin
-      mv.exposure = Math.min(1.4, Math.max(0.7, 0.6 + env.lum * 1.0));
+      mv.exposure = Math.min(2.6, Math.max(1.4, 1.2 + env.lum * 1.8));
       mv.shadowIntensity = 0.9; mv.shadowSoftness = 0.6;
       cam.theta = SUN_AZ - env.psi; applyCamera();
     });
