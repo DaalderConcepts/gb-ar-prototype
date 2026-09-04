@@ -871,6 +871,8 @@
     var hint = document.getElementById('arHint');
     document.body.classList.toggle('ar-active', e.detail.status !== 'not-presenting' && e.detail.status !== 'failed');
     if (e.detail.status === 'session-started') {
+      // in AR nooit automatisch draaien: de draaischijf zou de kamado in je tuin laten ronddraaien
+      var rb = document.querySelector('[data-autorotate]'); if (rb && rb.classList.contains('is-on')) rb.click();
       hint.textContent = 'Houd je telefoon stil en richt op een lege plek op de vloer. De kamado verschijnt daar op ware grootte.';
       hint.classList.add('is-on');
       if (!innerState.zone) { setVisible('placering', true); setTimeout(function () { if (!innerState.zone) setVisible('placering', false); }, 8000); }
