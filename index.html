@@ -762,7 +762,7 @@
   // ---- wijzerplaat van de thermometer ----
   function drawDial(logoImg) {
     var N = 1024, c = document.createElement('canvas'); c.width = N; c.height = N;
-    var x = c.getContext('2d'), cx = N / 2, cy = N / 2, R = N * 0.335;   // de projectie dekt de hele behuizing (9 cm); de zichtbare plaat is 6,2 cm
+    var x = c.getContext('2d'), cx = N / 2, cy = N / 2, R = N * 0.48;   // de schijf zelf is de textuurruimte (0..1)
     x.fillStyle = '#0b0b0c'; x.fillRect(0, 0, N, N);
     x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.fillStyle = '#101113'; x.fill();
     x.beginPath(); x.arc(cx, cy, R * 0.985, 0, Math.PI * 2); x.strokeStyle = '#3a3b3e'; x.lineWidth = N * 0.012; x.stroke();
@@ -789,8 +789,9 @@
     x.beginPath(); x.arc(cx, cy, N * 0.02, 0, Math.PI * 2); x.fillStyle = '#c9c4b8'; x.fill();
     return c;
   }
+  window.__applyDial = function () { try { applyDial(); } catch (e) { window.__dialErr = String(e); } };
   function applyDial() {
-    var m = matByName('dialface'); if (!m) return;
+    var m = matByName('dialface'); window.__dialM = !!m; if (!m) return;
     var finish = function (logoImg) {
       drawDial(logoImg).toBlob(function (blob) {
         var url = URL.createObjectURL(blob);
@@ -803,7 +804,7 @@
     };
     try { createImageBitmap(b64ToBlob('logo', 'image/png')).then(finish, function () { finish(null); }); } catch (e) { finish(null); }
   }
-  mv.addEventListener('load', function () { setTimeout(applyDial, 120); });
+  mv.addEventListener('load', function () { setTimeout(window.__applyDial, 120); setTimeout(window.__applyDial, 3000); });
 
   // AR-hint: tonen zodra de sessie loopt, na 6 s weer weg
   mv.addEventListener('ar-status', function (e) {
