@@ -164,6 +164,13 @@
   body.sheet-open .opt-btn svg { animation: none; }
   @media (prefers-reduced-motion: reduce) { .fs-btn svg, .opt-btn svg { animation: none; } }
   .sheet .chips { scroll-behavior: smooth; }
+  /* schuifbalk in Grill Bill-stijl: dun, vlam-oranje, zonder spoor */
+  .sheet { scrollbar-width: thin; scrollbar-color: rgba(243,144,25,.85) transparent; }
+  .sheet::-webkit-scrollbar { width: 6px; }
+  .sheet::-webkit-scrollbar-track { background: transparent; }
+  .sheet::-webkit-scrollbar-thumb { background: rgba(243,144,25,.85); border-radius: 3px; }
+  .sheet::-webkit-scrollbar-thumb:hover { background: var(--flame); }
+  .sheet .chips::-webkit-scrollbar { height: 0; }
   .sheet .qrrow { align-items: flex-start; gap: 14px; }
   .sheet .qr2 { background: var(--cream); padding: 6px; border-radius: 6px; width: 104px; height: 104px; flex: none; display: grid; place-items: center; }
   .sheet .qr2 canvas, .sheet .qr2 img { width: 92px; height: 92px; display: block; image-rendering: pixelated; }
@@ -476,6 +483,7 @@
     function up(e) { pts.delete(e.pointerId); if (!pts.size) cam.dragging = false; }
     mv.addEventListener('pointerup', up); mv.addEventListener('pointercancel', up);
     mv.addEventListener('wheel', function (e) {
+      if (e.target.closest && e.target.closest('.sheet')) return;   // scrollen in de lade is geen zoom
       e.preventDefault(); cam.lastInput = performance.now();
       cam.radius = Math.min(5.5, Math.max(1.2, cam.radius * (1 + e.deltaY * 0.0012))); applyCamera();
     }, { passive: false });
