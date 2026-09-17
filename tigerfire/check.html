@@ -1,0 +1,9 @@
+<!doctype html><html><body style="margin:0;background:#ddd">
+<model-viewer id="mv" camera-controls exposure="1.2" tone-mapping="neutral" shadow-intensity="1" camera-orbit="30deg 72deg 3m" style="width:100vw;height:100vh"></model-viewer>
+<script type="module">
+import 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.0.0/dist/model-viewer.min.js';
+customElements.get('model-viewer').meshoptDecoderLocation = 'https://grillbill.eu/neura-3d/meshopt_decoder.js';
+const q = new URLSearchParams(location.search);
+mv.src = q.get('f');
+mv.addEventListener('load', () => { for (const m of mv.model.materials) if (m.name === 'placering') m.pbrMetallicRoughness.setBaseColorFactor([0,0,0,0]), m.setAlphaMode('BLEND'); });
+</script></body></html>
